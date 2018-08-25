@@ -91,7 +91,7 @@ func askLetters() {
 	}
 }
 
-func askUppercaseLetters(){
+func askUppercaseLetters() {
 	p.Uppercase.min = 0
 
 	fmt.Println("Uppercase letters amount [" + strconv.Itoa(p.Uppercase.min) + "-" + strconv.Itoa(p.Letters.amount) + "]: ")
@@ -144,7 +144,8 @@ func askSymbols() {
 
 func parseInputToInt(input string, err error) int {
 	if err == nil {
-		tempInputString := strings.Replace(input, "\n", "", -1)
+		replacer := strings.NewReplacer("\n", "", "\r", "")
+		tempInputString := replacer.Replace(input)
 		tempInt64, _ := strconv.ParseInt(tempInputString, 10, 0)
 		return int(tempInt64)
 	}
@@ -157,6 +158,7 @@ func updatePasswordLength() {
 
 func badInput() {
 	fmt.Println("Bad input, exiting...")
+	time.Sleep(1000 * time.Millisecond)
 	os.Exit(1)
 }
 
