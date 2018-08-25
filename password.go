@@ -3,12 +3,12 @@ package main
 import (
 	"fmt"
 	"os"
-	"bufio"
 	"strconv"
 	"strings"
 	"time"
 	"math/rand"
 	"unicode"
+	"bufio"
 )
 
 type Scope struct {
@@ -56,9 +56,9 @@ type Runes struct {
 }
 
 var p = Password{Length{Scope{6, 20}, 0}, Letters{}, Numbers{}, Uppercase{}, Symbols{}, ""}
-var r = Runes{[]rune("abcdefghijklmnopqrstuvwxyz"), []rune("1234567890"), []rune("`~!@#$%^&*()-=_+[]{};':,./<>?")}
+var r = Runes{[]rune("abcdefghijklmnopqrstuvwxyz"), []rune("1234567890"), []rune("!#$%&'()*+,-./:;<=>?@[]^_`{|}~")}
 
-var reader = bufio.NewReader(os.Stdin)
+var scanner = bufio.NewScanner(os.Stdin)
 
 func init() {
 	rand.Seed(time.Now().UnixNano())
@@ -75,15 +75,15 @@ func main() {
 
 	buildPassword()
 
-	fmt.Println("Your password: " + p.string)
+	returnPassword()
 }
 
 func askLetters() {
 	fmt.Println("Letters amount [" + strconv.Itoa(p.Length.min) + "-" + strconv.Itoa(p.Length.max) + "]: ")
 
-	lettersAmount := parseInputToInt(reader.ReadString('\n'))
+	lettersAmount := parseIntFromStdIn()
 
-	if int(lettersAmount) >= p.Length.min && int(lettersAmount) <= p.Length.max {
+	if lettersAmount >= p.Length.min && lettersAmount <= p.Length.max {
 		p.Letters.amount = int(lettersAmount)
 		updatePasswordLength()
 	} else {
@@ -96,10 +96,10 @@ func askUppercaseLetters() {
 
 	fmt.Println("Uppercase letters amount [" + strconv.Itoa(p.Uppercase.min) + "-" + strconv.Itoa(p.Letters.amount) + "]: ")
 
-	uppercaseLettersAmount := parseInputToInt(reader.ReadString('\n'))
+	uppercaseLettersAmount := parseIntFromStdIn()
 
-	if int(uppercaseLettersAmount) >= p.Uppercase.min && int(uppercaseLettersAmount) <= p.Letters.amount {
-		p.Uppercase.amount = int(uppercaseLettersAmount)
+	if uppercaseLettersAmount >= p.Uppercase.min && uppercaseLettersAmount <= p.Letters.amount {
+		p.Uppercase.amount = uppercaseLettersAmount
 	} else {
 		badInput()
 	}
@@ -112,10 +112,10 @@ func askNumbers() {
 
 		fmt.Println("Numbers amount [" + strconv.Itoa(p.Numbers.min) + "-" + strconv.Itoa(p.Numbers.max) + "]: ")
 
-		numbersAmount := parseInputToInt(reader.ReadString('\n'))
+		numbersAmount := parseIntFromStdIn()
 
-		if int(numbersAmount) >= 0 && int(numbersAmount) <= p.Length.max-p.Length.current {
-			p.Numbers.amount = int(numbersAmount)
+		if numbersAmount >= 0 && numbersAmount <= p.Length.max-p.Length.current {
+			p.Numbers.amount = numbersAmount
 			updatePasswordLength()
 		} else {
 			badInput()
@@ -130,10 +130,10 @@ func askSymbols() {
 
 		fmt.Println("Symbols amount [" + strconv.Itoa(p.Symbols.min) + "-" + strconv.Itoa(p.Symbols.max) + "]: ")
 
-		symbolsAmount := parseInputToInt(reader.ReadString('\n'))
+		symbolsAmount := parseIntFromStdIn()
 
-		if int(symbolsAmount) >= 0 && int(symbolsAmount) <= p.Length.max-p.Length.current {
-			p.Symbols.amount = int(symbolsAmount)
+		if symbolsAmount >= 0 && symbolsAmount <= p.Length.max-p.Length.current {
+			p.Symbols.amount = symbolsAmount
 			updatePasswordLength()
 		} else {
 			fmt.Println("Bad input, exiting...")
@@ -142,14 +142,14 @@ func askSymbols() {
 	}
 }
 
-func parseInputToInt(input string, err error) int {
-	if err == nil {
-		replacer := strings.NewReplacer("\n", "", "\r", "")
-		tempInputString := replacer.Replace(input)
-		tempInt64, _ := strconv.ParseInt(tempInputString, 10, 0)
-		return int(tempInt64)
+func parseIntFromStdIn() int {
+	var i int
+	fmt.Scan()
+	_, err := fmt.Scanf("%d\n", &i)
+	if err != nil {
+		badInput()
 	}
-	return 0
+	return i
 }
 
 func updatePasswordLength() {
@@ -195,4 +195,15 @@ func buildPassword() {
 	})
 
 	p.string = strings.Join(array, "")
+}
+
+func returnPassword() {
+	fmt.Println("Your password: " + p.string)
+
+	fmt.Println("Press (Enter) to exit...")
+	fmt.Scanln()
+
+	fmt.Println("Success, exiting...")
+	time.Sleep(1000 * time.Millisecond)
+	os.Exit(1)
 }
